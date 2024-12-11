@@ -2,34 +2,51 @@ from dataclasses import dataclass
 from typing import Union
 
 @dataclass
-class Var:
+class Term:
+    """基础项类型"""
+    pass
+
+@dataclass
+class Var(Term):
     """变量"""
     name: str
 
+    def __str__(self):
+        return self.name
+
 @dataclass
-class Universe:
+class Universe(Term):
     """Universe类型 (Type_n)"""
     level: int
 
-@dataclass
-class Pi:
-    """依赖函数类型 (Π)"""
-    param_name: str
-    param_type: 'Term'
-    return_type: 'Term'
+    def __str__(self):
+        return f"Type₀" if self.level == 0 else f"Type_{self.level}"
 
 @dataclass
-class Lambda:
-    """Lambda抽象"""
-    param_name: str
-    param_type: 'Term'
+class Pi(Term):
+    """依赖函数类型 (Π)"""
+    var_name: str
+    var_type: 'Term'
     body: 'Term'
 
+    def __str__(self):
+        return f"Π ({self.var_name} : {self.var_type}). {self.body}"
+
 @dataclass
-class Apply:
+class Lambda(Term):
+    """Lambda抽象"""
+    var_name: str
+    var_type: 'Term'
+    body: 'Term'
+
+    def __str__(self):
+        return f"λ ({self.var_name} : {self.var_type}). {self.body}"
+
+@dataclass
+class App(Term):
     """函数应用"""
     func: 'Term'
     arg: 'Term'
 
-# 项的类型定义
-Term = Union[Var, Universe, Pi, Lambda, Apply] 
+    def __str__(self):
+        return f"{self.func} {self.arg}" 

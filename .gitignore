@@ -37,3 +37,7 @@ ENV/
 dist/
 build/
 *.egg-info/ 
+
+#credentials
+.pypirc
+    

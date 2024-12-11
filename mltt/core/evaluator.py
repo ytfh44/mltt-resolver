@@ -14,16 +14,16 @@ class Evaluator:
             return UniverseValue(term.level)
             
         elif isinstance(term, Lambda):
-            return ClosureValue(self.env.copy(), term.param_name, term.body)
+            return ClosureValue(self.env.copy(), term.var_name, term.body)
             
-        elif isinstance(term, Apply):
+        elif isinstance(term, App):
             func_val = self.eval(term.func)
             arg_val = self.eval(term.arg)
             
             if isinstance(func_val, ClosureValue):
                 # 应用闭包
                 new_env = func_val.env.copy()
-                new_env[func_val.param_name] = arg_val
+                new_env[func_val.var_name] = arg_val
                 with self.in_env(new_env):
                     return self.eval(func_val.body)
             else:
