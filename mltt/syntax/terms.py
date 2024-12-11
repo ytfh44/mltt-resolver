@@ -20,7 +20,7 @@ class Universe(Term):
     level: int
 
     def __str__(self):
-        return f"Type₀" if self.level == 0 else f"Type_{self.level}"
+        return f"Type_{self.level}"
 
 @dataclass
 class Pi(Term):
