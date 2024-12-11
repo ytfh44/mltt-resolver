@@ -20,6 +20,12 @@ wheels/
 .installed.cfg
 *.egg
 
+# Testing
+.pytest_cache/
+.hypothesis/
+.coverage
+htmlcov/
+
 # IDE
 .idea/
 .vscode/
@@ -32,6 +38,8 @@ wheels/
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 
 # Distribution
 dist/
