@@ -13,7 +13,7 @@ class TypeChecker:
     def infer(self, term: Term) -> Term:
         """推导term的类型"""
         if isinstance(term, Var):
-            type_ = self.context.lookup(term.name)
+            type_ = self.context.get_var_type(term.name)
             if type_ is None:
                 raise TypeError(f"Unbound variable: {term.name}")
             return type_
@@ -24,14 +24,14 @@ class TypeChecker:
             
         elif isinstance(term, Pi):
             # 检查参数类型
-            param_type_type = self.infer(term.param_type)
+            param_type_type = self.infer(term.var_type)
             if not isinstance(param_type_type, Universe):
                 raise TypeError("Parameter type must be a type")
                 
             # 在扩展的上下文中检查返回类型
-            extended_ctx = self.context.extend(term.param_name, term.param_type)
+            extended_ctx = self.context.extend(term.var_name, term.var_type)
             with self.in_context(extended_ctx):
-                return_type_type = self.infer(term.return_type)
+                return_type_type = self.infer(term.body)
                 if not isinstance(return_type_type, Universe):
                     raise TypeError("Return type must be a type")
                     
@@ -40,31 +40,31 @@ class TypeChecker:
             
         elif isinstance(term, Lambda):
             # 检查参数类型
-            param_type_type = self.infer(term.param_type)
+            param_type_type = self.infer(term.var_type)
             if not isinstance(param_type_type, Universe):
                 raise TypeError("Parameter type must be a type")
                 
             # 在扩展的上下文中检查函数体
-            extended_ctx = self.context.extend(term.param_name, term.param_type)
+            extended_ctx = self.context.extend(term.var_name, term.var_type)
             with self.in_context(extended_ctx):
                 body_type = self.infer(term.body)
                 
             # Lambda的类型是对应的Pi类型
-            return Pi(term.param_name, term.param_type, body_type)
+            return Pi(term.var_name, term.var_type, body_type)
             
-        elif isinstance(term, Apply):
+        elif isinstance(term, App):
             func_type = self.infer(term.func)
             if not isinstance(func_type, Pi):
                 raise TypeError("Cannot apply non-function")
                 
             # 检查参数类型匹配
-            if not self.check(term.arg, func_type.param_type):
+            if not self.check(term.arg, func_type.var_type):
                 raise TypeError("Argument type mismatch")
                 
             # 替换返回类型中的变量
             return self.substitute(
-                func_type.return_type,
-                func_type.param_name,
+                func_type.body,
+                func_type.var_name,
                 term.arg
             )
             
@@ -86,20 +86,20 @@ class TypeChecker:
             # 递归替换
             if isinstance(term, Pi):
                 return Pi(
-                    term.param_name,
-                    self.substitute(term.param_type, var_name, replacement),
-                    self.substitute(term.return_type, var_name, replacement)
+                    term.var_name,
+                    self.substitute(term.var_type, var_name, replacement),
+                    self.substitute(term.body, var_name, replacement)
                 )
             elif isinstance(term, Lambda):
                 return Lambda(
-                    term.param_name,
-                    self.substitute(term.param_type, var_name, replacement),
+                    term.var_name,
+                    self.substitute(term.var_type, var_name, replacement),
                     self.substitute(term.body, var_name, replacement)
                 )
             return term
             
-        elif isinstance(term, Apply):
-            return Apply(
+        elif isinstance(term, App):
+            return App(
                 self.substitute(term.func, var_name, replacement),
                 self.substitute(term.arg, var_name, replacement)
             )

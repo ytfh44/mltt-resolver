@@ -135,10 +135,14 @@ class TypeChecker:
                                    self.evaluator.eval(v2.body)))
                                    
         elif isinstance(v1, NeutralValue) and isinstance(v2, NeutralValue):
+            # 比较中性值的结构
             if not isinstance(v1.term, type(v2.term)):
                 return False
             if len(v1.args) != len(v2.args):
                 return False
+            if isinstance(v1.term, Var) and isinstance(v2.term, Var):
+                if v1.term.name != v2.term.name:
+                    return False
             return all(self.values_equal(a1, a2) for a1, a2 in zip(v1.args, v2.args))
             
         return False
