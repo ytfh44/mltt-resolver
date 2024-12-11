@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="mltt-resolver",
-    version="0.1.0.0.1",
+    version="0.1.0.0.2",
     packages=find_packages(),
     install_requires=[],
     extras_require={
