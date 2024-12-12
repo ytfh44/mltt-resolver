@@ -1,6 +1,6 @@
 import pytest
-from mltt.checker import TypeChecker
-from mltt.syntax import *
+from mltt.checker import TypeChecker, TypeError as MLTTTypeError
+from mltt.syntax.terms import *
 from mltt.context import Context
 
 def test_var_type_inference():
@@ -16,7 +16,7 @@ def test_var_type_inference():
     assert checker.infer(var) == type0
     
     # Test unbound variable
-    with pytest.raises(TypeError, match="Unbound variable"):
+    with pytest.raises(MLTTTypeError, match="Unbound variable"):
         checker.infer(Var("y"))
 
 def test_universe_type_inference():
@@ -41,11 +41,11 @@ def test_pi_type_inference():
     assert checker.infer(pi) == Universe(1)
     
     # Invalid parameter type
-    with pytest.raises(TypeError, match="Unbound variable"):
+    with pytest.raises(MLTTTypeError, match="Unbound variable"):
         checker.infer(Pi("x", Var("A"), type0))
     
     # Invalid return type
-    with pytest.raises(TypeError, match="Unbound variable"):
+    with pytest.raises(MLTTTypeError, match="Unbound variable"):
         checker.infer(Pi("x", type0, Var("B")))
 
 def test_lambda_type_inference():
@@ -65,7 +65,7 @@ def test_lambda_type_inference():
         assert checker.infer(Var("x")) == type0
     
     # Invalid parameter type
-    with pytest.raises(TypeError, match="Unbound variable"):
+    with pytest.raises(MLTTTypeError, match="Unbound variable"):
         checker.infer(Lambda("x", Var("A"), Var("x")))
 
 def test_application_type_inference():
@@ -84,11 +84,11 @@ def test_application_type_inference():
     assert checker.infer(app) == var_a
     
     # Invalid function
-    with pytest.raises(TypeError, match="Cannot apply non-function"):
+    with pytest.raises(MLTTTypeError, match="Cannot apply non-function"):
         checker.infer(App(type0, Var("x")))
     
     # Type mismatch
-    with pytest.raises(TypeError, match="Argument type mismatch"):
+    with pytest.raises(MLTTTypeError, match="Argument type mismatch"):
         checker.infer(App(lam, type0))
 
 def test_substitution():

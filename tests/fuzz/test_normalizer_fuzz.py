@@ -1,8 +1,9 @@
 from hypothesis import given, strategies as st
 from mltt.syntax.terms import *
-from mltt.core.checker import TypeChecker
+from mltt.core.checker import TypeChecker, TypeError as MLTTTypeError
 from mltt.core.evaluator import Evaluator
 from mltt.core.normalizer import Normalizer
+import pytest
 
 # 定义策略
 @st.composite
@@ -96,6 +97,7 @@ def test_normalization_type_preservation_fuzz(term):
         # 验证类型被保持
         assert checker.is_equal(original_type, normalized_type)
         
+    except MLTTTypeError:
+        pass  # 预期的类型错误
     except Exception as e:
-        # 确保所有异常都是预期的类型错误
-        assert isinstance(e, TypeError) 
+        pytest.fail(f"Unexpected error: {e}") 

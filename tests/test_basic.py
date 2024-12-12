@@ -49,10 +49,10 @@ def test_syntax_str():
     assert str(var) == "x"
     
     lam = Lambda("x", Var("A"), Var("x"))
-    assert str(lam) == "λ (x : A). x"
+    assert str(lam) == "λ(x : A).x"
     
     pi = Pi("x", Var("A"), Var("B"))
-    assert str(pi) == "Π (x : A). B"
+    assert str(pi) == "Π(x : A).B"
     
     app = App(Var("f"), Var("x"))
     assert str(app) == "f x"
@@ -73,3 +73,25 @@ def test_syntax_eq():
     
     assert App(Var("f"), Var("x")) == App(Var("f"), Var("x"))
     assert App(Var("f"), Var("x")) != App(Var("g"), Var("x"))
+
+def test_repr():
+    """测试repr方法"""
+    # 测试 Var
+    var = Var("x")
+    assert repr(var) == "Var(name='x')"
+    
+    # 测试 Universe
+    universe = Universe(0)
+    assert repr(universe) == "Universe(level=0)"
+    
+    # 测试 Pi
+    pi = Pi("x", Universe(0), Var("x"))
+    assert repr(pi) == "Pi(var_name='x', var_type=Universe(level=0), body=Var(name='x'))"
+    
+    # 测试 Lambda
+    lambda_term = Lambda("x", Universe(0), Var("x"))
+    assert repr(lambda_term) == "Lambda(var_name='x', var_type=Universe(level=0), body=Var(name='x'))"
+    
+    # 测试 App
+    app = App(lambda_term, var)
+    assert repr(app) == "App(func=Lambda(var_name='x', var_type=Universe(level=0), body=Var(name='x')), arg=Var(name='x'))"

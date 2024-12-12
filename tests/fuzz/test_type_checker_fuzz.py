@@ -1,6 +1,7 @@
 from hypothesis import given, strategies as st
 from mltt.syntax.terms import *
-from mltt.core.checker import TypeChecker
+from mltt.core.checker import TypeChecker, TypeError as MLTTTypeError
+import pytest
 
 # 定义策略
 @st.composite
@@ -33,7 +34,7 @@ def term_strategy(draw, max_depth=3):
             var_type=term_strategy(max_depth=max_depth-1),
             body=term_strategy(max_depth=max_depth-1)
         ),
-        # Lambda 表达���
+        # Lambda 表达式
         st.builds(
             Lambda,
             var_name=st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll')), min_size=1, max_size=5),
@@ -65,9 +66,10 @@ def test_type_checker_fuzz(term):
         # 验证类型检查
         assert checker.check(term, type_)
         
+    except MLTTTypeError:
+        pass  # 预期的类型错误
     except Exception as e:
-        # 确保所有异常都是预期的类型错误
-        assert isinstance(e, TypeError)
+        pytest.fail(f"Unexpected error: {e}")
 
 @given(
     var_name=st.text(alphabet=st.characters(whitelist_categories=('Lu', 'Ll')), min_size=1, max_size=5),
@@ -75,7 +77,7 @@ def test_type_checker_fuzz(term):
     body=term_strategy()
 )
 def test_lambda_pi_fuzz(var_name, var_type, body):
-    """测试 Lambda 和 Pi ��型的构造和类型检查"""
+    """测试 Lambda 和 Pi 类型的构造和类型检查"""
     checker = TypeChecker()
     
     # 构造 Lambda 和对应的 Pi 类型
@@ -90,9 +92,10 @@ def test_lambda_pi_fuzz(var_name, var_type, body):
         # 尝试检查 Lambda 表达式是否符合 Pi 类型
         checker.check(lam, pi)
         
+    except MLTTTypeError:
+        pass  # 预期的类型错误
     except Exception as e:
-        # 确保所有异常都是预期的类型错误
-        assert isinstance(e, TypeError)
+        pytest.fail(f"Unexpected error: {e}")
 
 @given(
     func=term_strategy(),
@@ -108,6 +111,7 @@ def test_application_fuzz(func, arg):
         type_ = checker.infer(app)
         assert isinstance(type_, Term)
         
+    except MLTTTypeError:
+        pass  # 预期的类型错误
     except Exception as e:
-        # 确保所有异常都是预期的类型错误
-        assert isinstance(e, TypeError) 
+        pytest.fail(f"Unexpected error: {e}") 
